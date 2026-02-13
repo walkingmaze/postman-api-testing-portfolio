@@ -10,84 +10,83 @@ This portfolio includes 10 tests covering basic functionality to advanced automa
 ## Test 1: Basic GET Request
 
 **Purpose**  
-Confirms the API delivers cat images reliably. Checks if the image-retrieval function works quickly with valid data. [perplexity](https://www.perplexity.ai/search/f14b29d1-5967-41b3-9dba-030d6cfa3b2e)
+Confirms the API delivers cat images reliably. Checks if the image-retrieval function works quickly with valid data. 
 
 **How It Works**  
-Sends a GET request to `/images/search`. [perplexity](https://www.perplexity.ai/search/a574436f-7bb9-4b40-a000-8069048b2612)
+Sends a GET request to `/images/search`. 
 
 **What's Checked**  
 - Status code 200.  
 - Response under 2 seconds.  
-- Includes image data (not empty). [perplexity](https://www.perplexity.ai/search/f14b29d1-5967-41b3-9dba-030d6cfa3b2e)
+- Includes image data (not empty).
 
 **Why It Matters**  
-Ensures the core feature—returning cat images—works every time. [perplexity](https://www.perplexity.ai/search/a574436f-7bb9-4b40-a000-8069048b2612)
+Ensures the core feature—returning cat images—works every time. 
 
 ## Test 2: Query Parameters
 
 **Purpose**  
-Tests handling of parameters like image count and verifies secure access. [perplexity](https://www.perplexity.ai/search/c63f209c-100a-4c22-aa80-af7310155858)
+Tests handling of parameters like image count and verifies secure access. 
 
 **How It Works**  
-GET `/images/search?limit=5&size=small`. Expects 1-10 images. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
+GET `/images/search?limit=5&size=small`. Expects 1-10 images. 
 
 **What's Checked**  
 - Images in 1–10 range.  
 - Each has ID, URL, width, height.  
 - URLs use https://.  
-- Logs requested vs. actual count. [perplexity](https://www.perplexity.ai/search/c63f209c-100a-4c22-aa80-af7310155858)
+- Logs requested vs. actual count. 
 
 **Why It Matters**  
-Shows consistent, secure data with parameters. [perplexity](https://www.perplexity.ai/search/c63f209c-100a-4c22-aa80-af7310155858)
+Shows consistent, secure data with parameters.
 
 ## Test 3: Environment Variables
 
 **Purpose**  
-Extracts breed data and saves an ID for reuse in later tests. [perplexity](https://www.perplexity.ai/search/13c387da-09a5-4177-bdef-9498e14c7c84)
+Extracts breed data and saves an ID for reuse in later tests. 
 
 **How It Works**  
-GET `{{base_url}}/{{api_version}}/images/search`. Stores first breed ID as `breed_id`. [perplexity](https://www.perplexity.ai/search/c9c6089e-64c9-4864-911f-72313e34f18e)
+GET `{{base_url}}/{{api_version}}/images/search`. Stores first breed ID as `breed_id`. 
 
 **Expected Results**  
 - Status 200.  
 - At least one item.  
-- `breed_id` saved. Logs missing breed names. [perplexity](https://www.perplexity.ai/search/13c387da-09a5-4177-bdef-9498e14c7c84)
+- `breed_id` saved. Logs missing breed names.
 
 **What's Covered**  
-Environment variables, incomplete data handling, request chaining setup. [perplexity](https://www.perplexity.ai/search/c9c6089e-64c9-4864-911f-72313e34f18e)
+Environment variables, incomplete data handling, request chaining setup. 
 
 ## Test 4: Request Chaining
 
 **Purpose**  
-Uses `breed_id` from Test 3 to fetch breed-specific images. [perplexity](https://www.perplexity.ai/search/13c387da-09a5-4177-bdef-9498e14c7c84)
+Uses `breed_id` from Test 3 to fetch breed-specific images. 
 
 **How It Works**  
-GET `/images/search?breed_ids={{breed_id}}&limit=3`. [perplexity](https://www.perplexity.ai/search/264f7d5e-7211-447d-a880-b7f0ceb1aa68)
+GET `/images/search?breed_ids={{breed_id}}&limit=3`.
 
 **What's Checked**  
 - Status 200.  
 - 0+ images (handles rare breeds).  
-- Matching breed ID and name if present. [perplexity](https://www.perplexity.ai/search/264f7d5e-7211-447d-a880-b7f0ceb1aa68)
+- Matching breed ID and name if present.
 
 **Why It Matters**  
-Builds dynamic workflows with real API data. [perplexity](https://www.perplexity.ai/search/264f7d5e-7211-447d-a880-b7f0ceb1aa68)
+Builds dynamic workflows with real API data. 
 
 ## Test 5: Invalid Breed ID
 
 **Purpose**  
-Ensures graceful handling of bad input without crashes. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
+Ensures graceful handling of bad input without crashes. 
 
 **How It Works**  
-GET `/images/search?breed_ids=INVALID999`. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
+GET `/images/search?breed_ids=INVALID999`.
 
 **What's Checked**  
 - Status 200.  
 - Empty array or images without breed data.  
-- Valid JSON format. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
+- Valid JSON format. 
 
 **Why It Matters**  
-Prioritizes stability over strict validation. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
-
+Prioritizes stability over strict validation. 
 ## Test 6: Data Type Validation
 
 **Purpose**  
@@ -132,50 +131,50 @@ GET `/images/search?limit=1`. Checks array structure, fields, types. [perplexity
 **What's Checked**  
 - Status 200.  
 - Matches schema (id/url strings, width/height numbers ≥1, https URLs).  
-- Logs detailed errors. [perplexity](https://www.perplexity.ai/search/13c387da-09a5-4177-bdef-9498e14c7c84)
+- Logs detailed errors.
 
 **Why It Matters**  
-Ensures consistent structure; catches API changes fast. [perplexity](https://www.perplexity.ai/search/13c387da-09a5-4177-bdef-9498e14c7c84)
+Ensures consistent structure; catches API changes fast. 
 
 **Notes**  
-tv4 deprecation warning is cosmetic. [perplexity](https://www.perplexity.ai/search/13c387da-09a5-4177-bdef-9498e14c7c84)
+tv4 deprecation warning is cosmetic.
 
 ## Test 9: Pre-request Script
 
 **Purpose**  
-Generates dynamic data (random limit, timestamp, header) before request. [perplexity](https://www.perplexity.ai/search/ddb56306-bb0e-4004-b56c-22fa19653c24)
+Generates dynamic data (random limit, timestamp, header) before request. 
 
 **How It Works**  
 Pre-request: Sets `random_limit` (1-10), `test_timestamp`, `X-Test-Run-ID`.  
-GET `/images/search?limit={{random_limit}}`. API returns 10 regardless. [perplexity](https://www.perplexity.ai/search/ddb56306-bb0e-4004-b56c-22fa19653c24)
+GET `/images/search?limit={{random_limit}}`. API returns 10 regardless. 
 
 **What's Checked**  
 - Status 200.  
 - Exactly 10 images.  
-- Header sent. [perplexity](https://www.perplexity.ai/search/ddb56306-bb0e-4004-b56c-22fa19653c24)
+- Header sent. 
 
 **Why It Matters**  
-Automates setup for realistic, variable tests. [perplexity](https://www.perplexity.ai/search/ddb56306-bb0e-4004-b56c-22fa19653c24)
+Automates setup for realistic, variable tests. 
 
 **Notes**  
-API ignores limit without key; always 10 images. [perplexity](https://www.perplexity.ai/search/ddb56306-bb0e-4004-b56c-22fa19653c24)
+API ignores limit without key; always 10 images.
 
 ## Test 10: Comprehensive Suite
 
 **Purpose**  
-Full health check: HTTP, structure, data quality. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
+Full health check: HTTP, structure, data quality. 
 
 **How It Works**  
 Pre-request: Starts timer.  
 GET `/images/search?limit=5`.  
-Post: ~10 checks in groups. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
+Post: ~10 checks in groups. 
 
 **What's Checked**  
 - HTTP: 200, <3000ms, JSON type.  
 - Structure: Array, non-empty, ≤10.  
-- Data: IDs unique, https .com URLs, all fields. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
+- Data: IDs unique, https .com URLs, all fields. 
 
 **Why It Matters**  
-Quick regression for CI/CD; pinpoints issues. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
+Quick regression for CI/CD; pinpoints issues. 
 
 
