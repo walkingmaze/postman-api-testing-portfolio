@@ -123,10 +123,10 @@ Makes tests reusable across environments.
 ## Test 8: Schema Validation
 
 **Purpose**  
-Validates full response against JSON Schema blueprint. [perplexity](https://www.perplexity.ai/search/13c387da-09a5-4177-bdef-9498e14c7c84)
+Validates full response against JSON Schema blueprint. 
 
 **How It Works**  
-GET `/images/search?limit=1`. Checks array structure, fields, types. [perplexity](https://www.perplexity.ai/search/13c387da-09a5-4177-bdef-9498e14c7c84)
+GET `/images/search?limit=1`. Checks array structure, fields, types. 
 
 **What's Checked**  
 - Status 200.  
