@@ -7,10 +7,6 @@ This portfolio includes 10 tests covering basic functionality to advanced automa
 3. Select the environment from dropdown
 4. Run individual tests or entire collection
 
-## Postman Cat API Tests
-
-These 10 tests demonstrate key Postman features for testing The Cat API, from basic requests to advanced chaining and validation. They're designed for a junior QA portfolio, showing practical skills like data sharing and error handling. [perplexity](https://www.perplexity.ai/search/9950b7ad-7135-4d00-959f-1e450b3c1dcf)
-
 ## Test 1: Basic GET Request
 
 **Purpose**  
