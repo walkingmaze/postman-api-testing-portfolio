@@ -274,6 +274,53 @@ Confirms that the API response follows a strict structural blueprint by validati
 **Notes**  
 You may see a tv4 deprecation warning in the console—this is cosmetic and doesn't affect test functionality. The test performs two layers of validation: first against the full schema, then a direct check that required fields exist.
 
+## Test 9 - Pre-request Script Example
+
+**Purpose**  
+Demonstrates full test automation by generating dynamic test data before the request is sent, ensuring each run is unique and realistic without manual setup.
+
+**How It Works**
+
+- Before request (pre-request script):  
+    Generates a random limit (1-10) and saves it to the environment as random_limit  
+    Creates an ISO timestamp and saves as test_timestamp  
+    Adds a custom header X-Test-Run-ID (e.g., test-1700000000000)  
+    Logs values to console
+    
+- Request: GET /images/search?limit={{random_limit}} (uses the dynamic limit)
+    
+- After response (test script):  
+    Verifies status 200  
+    Confirms API returns exactly 10 images (ignores the limit parameter)  
+    Checks custom header was sent  
+    Logs: "Sent limit=X, API ignored it and sent 10 images"
+    
+
+**What's Checked**
+
+- Status code: 200 (success)
+    
+- Response size: Exactly 10 images, regardless of random limit sent (documents’ observed API behavior)
+    
+- Custom header: X-Test-Run-ID is present on the request
+    
+- Dynamic data: Reads random_limit from environment to confirm setup worked
+    
+
+**Why It Matters**
+
+- End-to-end automation: Handles setup (random data, headers, timestamps), execution, and validation automatically—no manual changes needed between runs.
+    
+- Real-world simulation: Mimics production variability (e.g., random limits, tracking headers) to catch issues like parameter ignoring early.
+    
+- Debugging insights: Console logs show exactly what data was generated and sent vs. what the API returned, speeding up troubleshooting.
+    
+- Re-usable patterns: Pre-request scripts can be shared across tests, reducing duplication and enabling data chaining (e.g., one test's output feeds another's input).
+    
+
+**Notes**  
+The API currently ignores limit without an API key, always returning 10 images—this test explicitly documents and verifies that behavior. Run it multiple times to see different random_limit values (1-10) in action.
+
 ## Test 10: Comprehensive Test Suite
 
 **Purpose**  
