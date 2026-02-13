@@ -1,0 +1,870 @@
+{
+  "info": {
+    "_postman_id": "d0f304db-76d4-4e8d-b1ad-e2e7ef43134e",
+    "name": "Cat API Testing Portfolio",
+    "description": "## This portfolio showcases 10 practical Postman tests for TheCatAPI:\n\n- API request testing (GET)\n    \n- Query parameter validation\n    \n- Environment variables\n    \n- Collection variables\n    \n- Request chaining\n    \n- Negative testing\n    \n- Data type validation\n    \n- Schema validation\n    \n- Pre-request scripts\n    \n- Everything tested at once",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49890859",
+    "_collection_link": "https://go.postman.co/collection/49890859-d0f304db-76d4-4e8d-b1ad-e2e7ef43134e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Test 1 - Get Random Cat Image",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// TEST 1: Check if request was successful",
+              "pm.test(\"Status code is 200 (Success)\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// TEST 2: Check if response time is acceptable",
+              "pm.test(\"Response time is less than 2000ms\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});",
+              "",
+              "// TEST 3: Check if data got back",
+              "pm.test(\"Response has data\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.length).to.be.above(0);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ]
+        },
+        "description": "## Test 1: Basic GET Request – Random Cat Image\n\n**Purpose**  \nConfirms that the API successfully delivers cat images when requested. This test checks if the chosen image‑retrieval function works, responds quickly, and provides valid data.\n\n**How It Works**  \nThe test sends a simple “GET” request to the API’s /images/search endpoint, which is designed to return one or more random cat images.\n\n**What’s Checked**\n\n- The API responds successfully (status code 200).\n    \n- The server replies within 2 seconds (performance check).\n    \n- The response actually includes image data (not an empty result).\n    \n\n**Why It Matters**  \nThis test ensures that the most basic feature of the API — returning cat images — works reliably."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 2 - Get Multiple Cat Images with Parameters",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Get response data + extract limit parameter  ",
+              "const jsonData = pm.response.json();",
+              "const requestedLimit = parseInt(pm.request.url.query.toObject().limit);",
+              "",
+              "",
+              "// TEST 1: Strict expectation (may fail – documents expected behavior)",
+              "pm.test(\"Expected: response length equals requested limit (\" + requestedLimit + \")\", function () {",
+              "    pm.expect(jsonData.length).to.eql(requestedLimit);",
+              "});",
+              "",
+              "",
+              "// TEST 2: Flexible expectation, based on observed API behavior",
+              "pm.test(\"Observed: API returns between 1 and 10 items\", function () {",
+              "    pm.expect(jsonData.length).to.be.above(0);    // At least 1 item",
+              "    pm.expect(jsonData.length).to.be.at.most(10); // At most 10 items",
+              "});",
+              "",
+              "",
+              "// TEST 3: Debugging Log - requested vs actual limit",
+              "pm.test(\"DEBUG: Log requested vs actual limit\", function () {",
+              "    console.log(\"🔍 Requested limit:\", requestedLimit);",
+              "    console.log(\"📊 Actual response length:\", jsonData.length);",
+              "    console.log(\"✅ Difference:\", jsonData.length - requestedLimit);",
+              "});",
+              "",
+              "",
+              "",
+              "// TEST 4: Validation – each image object has the expected fields",
+              "pm.test(\"Each image has id, url, width, and height\", function () {",
+              "    jsonData.forEach(function(image) {",
+              "        pm.expect(image).to.have.property('id');",
+              "        pm.expect(image).to.have.property('url');",
+              "        pm.expect(image).to.have.property('width');",
+              "        pm.expect(image).to.have.property('height');",
+              "    });",
+              "});",
+              "",
+              "",
+              "// TEST 5: URL format sanity check – URLs should use HTTPS",
+              "pm.test(\"Image URLs are valid HTTPS URLs\", function () {",
+              "    jsonData.forEach(function(image) {",
+              "        pm.expect(image.url).to.include('https://');",
+              "    });",
+              "    ",
+              "    console.log(\"Verified HTTPS for \" + jsonData.length + \" URLs\");",
+              "});",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.thecatapi.com/v1/images/search?limit=5&size=small",
+          "protocol": "https",
+          "host": [
+            "api",
+            "thecatapi",
+            "com"
+          ],
+          "path": [
+            "v1",
+            "images",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "5"
+            },
+            {
+              "key": "size",
+              "value": "small"
+            }
+          ]
+        },
+        "description": "## Test 2: Query Parameters – Multiple Cat Images\n\n**Purpose**  \nChecks whether the API correctly handles query parameters (like how many images to return) and whether each image is securely accessible.\n\n**How It Works**  \nThe test sends a “GET” request asking for 5 small‑sized cat images (/images/search?limit=5&size=small). The API should ideally return 5 results, but it sometimes returns between 1 and 10 instead, so the test captures both outcomes.\n\n**What’s Checked**\n\n- The number of images returned matches the expected range (1–10).\n    \n- Each image includes the necessary details (ID, URL, width, height).\n    \n- Every image link uses a secure “https://” address.\n    \n- Logs the difference between the requested and actual number of images for debugging.\n    \n\n**Why It Matters**  \nThis test shows how the system reacts to query parameters and whether it consistently delivers valid, secure data."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 3 - Using Environment Variables",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Save response for later use",
+              "const breeds = pm.response.json();",
+              "",
+              "// TEST 1: Status code is 200",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// TEST 2: Breeds list is not empty",
+              "pm.test(\"Breeds data is not empty\", function () {",
+              "    pm.expect(breeds.length).to.be.above(0);",
+              "});",
+              "",
+              "// TEST 3: Each breed has an id and most have a name field",
+              "pm.test(\"Each breed has an id; most have a name\", function () {",
+              "    breeds.forEach(function(breed, index) {",
+              "        pm.expect(breed).to.have.property('id');",
+              "",
+              "        if (!breed.name) {",
+              "            console.log(\"Breed missing name field. Index:\", index, \"ID:\", breed.id);",
+              "        }",
+              "    });",
+              "});",
+              "",
+              "// Saving first breed ID for next test",
+              "if (breeds.length > 0) {",
+              "    pm.environment.set(\"breed_id\", breeds[0].id);",
+              "    console.log(\"Saved breed ID: \" + breeds[0].id);",
+              "}",
+              "console.log(\"Saved breed ID: \" + breeds[0].id);",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ]
+        },
+        "description": "## Test 3: Environment Variables – Breed Data Extraction\n\n**Purpose**  \nPrepares later tests by taking real cat breed data from the API and saving one breed’s ID into a reusable variable.\n\n**How It Works**\n\n- Sends a GET request to {{base_url}}/{{api_version}}/images/search, which returns cat images along with breed information in the same response.\n    \n- Confirms the API responds successfully (status 200) and that the list of returned items is not empty.\n    \n- Checks that each item has an ID and logs any cases where the breed name is missing (this can happen with incomplete data).\n    \n- Saves the ID of the first breed into an environment variable called breed_id, so other tests can automatically reuse it without hard‑coding values.\n    \n\n**Expected Results**\n\n- Pass: The API returns status 200, there is at least one item in the list, and breed_id is stored for later tests.\n    \n- Note: Some breeds may not have a name filled in; these are just logged for information and do not cause the test to fail.\n    \n\n**What’s Covered**\n\n- Using environment variables to share data between tests.\n    \n- Handling real‑world, sometimes incomplete data without breaking the test.\n    \n- Setting up “request chaining” so follow‑up tests can use live API values instead of fixed test data."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 4 - Get Cat Image by Breed (Chained)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Get response data for image testing",
+              "const jsonData = pm.response.json();",
+              "",
+              "// TEST 1: API responds successfully",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// TEST 2: Valid response (empty OK for rare breeds)",
+              "pm.test(\"Response contains images for requested breed (0+ OK)\", function () {",
+              "    pm.expect(jsonData.length).to.be.at.least(0);",
+              "});",
+              "",
+              "// TEST 3: Images match requested breed (if images exist)",
+              "pm.test(\"Images match requested breed ID\", function () {",
+              "    const requestedBreedId = pm.environment.get(\"breed_id\");",
+              "    ",
+              "    jsonData.forEach(function(image, index) {",
+              "        if (image.breeds && image.breeds.length > 0) {",
+              "            pm.expect(image.breeds[0]).to.have.property('id');",
+              "            pm.expect(image.breeds[0].id).to.eql(requestedBreedId);",
+              "            pm.expect(image.breeds[0]).to.have.property('name');",
+              "        }",
+              "    });",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search?breed_ids={{breed_id}}&limit=3",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "breed_ids",
+              "value": "{{breed_id}}"
+            },
+            {
+              "key": "limit",
+              "value": "3"
+            }
+          ]
+        },
+        "description": "## Test 4: Request Chaining – Breed‑Specific Images\n\n**Purpose**  \nUses the breed ID saved by Test 3 to request images of that specific cat breed, demonstrating how tests can chain together using real data.\n\n**How It Works**  \nSends a GET request to /images/search?breed_ids={{breed_id}}&limit=3, where {{breed_id}} is the value automatically pulled from the environment variable set by Test 3.\n\n**What’s Checked**\n\n- The API responds successfully (status 200).\n    \n- The number of images returned is acceptable (0 or more is fine, as rare breeds may have no images).\n    \n- If images are returned, each one’s breed information includes an ID that matches the requested breed_id, plus a breed name.\n    \n\n**Why It Matters**  \nThis test shows how to build realistic workflows where one API call’s output (like a breed ID) feeds directly into the next, using environment variables to make tests more dynamic. It also handles real‑world edge cases, like breeds with no available images, without breaking the entire test suite."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 5 - Negative Test - Invalid Breed ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "",
+              "// TEST 1: Status code check",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// TEST 2: Response might be empty or have no breed info",
+              "pm.test(\"Invalid breed returns empty results or images without breed data\", function () {",
+              "    // When an empty array or images without breed information are received",
+              "    if (jsonData.length === 0) {",
+              "        pm.expect(jsonData).to.have.lengthOf(0);",
+              "    } else {",
+              "        // Path B: Images returned → but NO breed match expected",
+              "        jsonData.forEach(function(image) {",
+              "            if (image.breeds) {",
+              "                pm.expect(image.breeds.length).to.equal(0);",
+              "            }",
+              "        });",
+              "    }",
+              "});",
+              "",
+              "// TEST 3: Response is still a valid JSON array",
+              "pm.test(\"Response is valid JSON array\", function () {",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search?breed_ids=INVALID999",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "breed_ids",
+              "value": "INVALID999"
+            }
+          ]
+        },
+        "description": "## Test 5: Negative Test - Invalid Breed ID\n\n**Purpose**  \nVerifies that the API handles invalid breed IDs gracefully without crashing or returning errors, maintaining stability even when given incorrect data.\n\n**How It Works**\n\n- Sends a request with a deliberately invalid breed ID: GET /images/search?breed_ids=INVALID999\n    \n- The API accepts the invalid input without crashing\n    \n- Returns either an empty array \\[\\] or images with no breed information attached\n    \n- Validates that the response remains properly formatted JSON despite the bad input\n    \n\n**What's Checked**\n\n- Status code is 200 - API responds successfully (doesn't treat it as an error)\n    \n- Graceful handling - Returns either zero results or images without breed data (breeds array is empty)\n    \n- Response structure - JSON array format is preserved even with invalid input\n    \n\n**Why It Matters**  \nThis test demonstrates that the API prioritizes stability over strict validation. Instead of crashing or returning error codes when users make mistakes, it returns empty results gracefully."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 6 - Data Type Validation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Get response data and first image for testing",
+              "const jsonData = pm.response.json();",
+              "const firstImage = jsonData[0];",
+              "",
+              "// TEST 1: API call succeeded",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// TEST 2: ID field is valid string",
+              "pm.test(\"Image ID is a non-empty string\", function () {",
+              "    pm.expect(firstImage.id).to.be.a('string');",
+              "    pm.expect(firstImage.id.length).to.be.above(0);",
+              "});",
+              "",
+              "// TEST 3: URL field is valid HTTPS string",
+              "pm.test(\"Image URL starts with https://\", function () {",
+              "    pm.expect(firstImage.url).to.be.a('string');",
+              "    pm.expect(firstImage.url).to.match(/^https:\\/\\//);",
+              "});",
+              "",
+              "// TEST 4: Width field is valid positive number",
+              "pm.test(\"Image width is positive number\", function () {",
+              "    pm.expect(firstImage.width).to.be.a('number');",
+              "    pm.expect(firstImage.width).to.be.above(0);",
+              "});",
+              "",
+              "// TEST 5: Height field is valid positive number",
+              "pm.test(\"Image height is positive number\", function () {",
+              "    pm.expect(firstImage.height).to.be.a('number');",
+              "    pm.expect(firstImage.height).to.be.above(0);",
+              "});",
+              "",
+              "// TEST 6: Response has correct JSON content type",
+              "pm.test(\"Content-Type header contains application/json\", function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search?limit=1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "description": "## Test 6: Data Type Validation\n\n**Purpose**  \nEnsures every piece of data returned by the API has the correct format and type - text fields contain text, numbers are actual numbers, and URLs are secure and properly formatted.\n\n**How It Works**\n\n- Requests exactly one image: GET /images/search?limit=1\n    \n- Examines the first image's core properties:\n    \n- id: Must be a non-empty text string\n    \n- url: Must start with https:// (secure URL)\n    \n- width & height: Must be positive numbers (not zero or negative)\n    \n- Verifies the server sends proper JSON formatting via the Content-Type header\n    \n\n**What's Checked**\n\n- Status code 200 - API call succeeds\n    \n- ID validation - Non-empty string\n    \n- URL validation - Secure HTTPS format\n    \n- Dimension validation - Width/height are positive numbers\n    \n- JSON header - Server promises JSON content\n    \n\n**Why It Matters**  \nData type validation catches common API bugs like numbers stored as text strings or missing decimal points, which break client applications. This test ensures the API delivers clean data that developers can rely on."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 7 - Using Collection Variables",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Get response data for breed testing",
+              "const jsonData = pm.response.json();",
+              "",
+              "// TEST 1: API responds successfully",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// TEST 2: Result count matches default limit",
+              "pm.test(\"Number of images ≤ default_limit\", function () {",
+              "    const expectedLimit = parseInt(pm.collectionVariables.get(\"default_limit\"));",
+              "    pm.expect(jsonData.length).to.be.at.most(expectedLimit);",
+              "});",
+              "",
+              "// TEST 3: All images match requested breed ID",
+              "pm.test(\"Images contain correct test_breed_id\", function () {",
+              "    const testBreedId = pm.collectionVariables.get(\"test_breed_id\");",
+              "    ",
+              "    jsonData.forEach(function(image) {",
+              "        if (image.breeds && image.breeds.length > 0) {",
+              "            pm.expect(image.breeds[0].id).to.equal(testBreedId);",
+              "        }",
+              "    });",
+              "});",
+              "",
+              "// LOG: Debug - show variables used in tests",
+              "console.log(\"Test Breed ID:\", pm.collectionVariables.get(\"test_breed_id\"));",
+              "console.log(\"Default Limit:\", pm.collectionVariables.get(\"default_limit\"));",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search?breed_ids={{test_breed_id}}&limit={{default_limit}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "breed_ids",
+              "value": "{{test_breed_id}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{default_limit}}"
+            }
+          ]
+        },
+        "description": "## Test 7: Collection Variables in Action\n\n**Purpose**  \nDemonstrates using collection variables ****(shared settings for the entire test suite) to make tests configurable, reusable, and easy to maintain across different environments or projects.\n\n**How It Works**\n\n- Requests cat images filtered by breed using collection settings:  \n    GET /images/search?breed_ids={{test_breed_id}}&limit={{default_limit}}\n    \n- Reads configuration values directly from collection variables:  \n    {{test_breed_id}} (e.g., \"beng\" for Bengal cats)  \n    {{default_limit}} (e.g., 10 images max)\n    \n- Logs the actual values used for debugging and verification\n    \n\n**What's Checked**\n\n- Status 200 - Request succeeds\n    \n- Limit respected - Number of images ≤ default_limit\n    \n- Breed filtering - All images with breed data match test_breed_id\n    \n- Variable resolution - Collection settings load correctly (logged to console)\n    \n\n**Why It Matters**  \nCollection variables act like a configuration dashboard for the entire test suite. This eliminates hard-coded values, makes tests portable across teams/environments, and shows professional test maintenance practices."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 8 - Schema Validation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Get response data for schema validation",
+              "const jsonData = pm.response.json();",
+              "",
+              "// Define expected response structure (JSON Schema)",
+              "const schema = {",
+              "    \"type\": \"array\",",
+              "    \"items\": {",
+              "        \"type\": \"object\",",
+              "        \"required\": [\"id\", \"url\", \"width\", \"height\"],",
+              "        \"properties\": {",
+              "            \"id\": { \"type\": \"string\" },",
+              "            \"url\": { \"type\": \"string\", \"pattern\": \"^https://\" },",
+              "            \"width\": { \"type\": \"number\", \"minimum\": 1 },",
+              "            \"height\": { \"type\": \"number\", \"minimum\": 1 },",
+              "            \"breeds\": { \"type\": \"array\" }",
+              "        }",
+              "    }",
+              "};",
+              "",
+              "// TEST 1: API responds successfully",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// TEST 2: Full response matches schema definition",
+              "pm.test(\"Response matches JSON schema\", function () {",
+              "    pm.expect(tv4.validate(jsonData, schema)).to.be.true;",
+              "});",
+              "",
+              "// TEST 3: Show schema errors if validation fails",
+              "if (!tv4.validate(jsonData, schema)) {",
+              "    console.log(\"Schema validation failed:\");",
+              "    console.log(\"Error details:\", tv4.error);",
+              "}",
+              "",
+              "// TEST 4: Double-check required fields exist",
+              "pm.test(\"All required fields are present in each image\", function () {",
+              "    jsonData.forEach(function(image) {",
+              "        pm.expect(image).to.have.all.keys('id', 'url', 'width', 'height');",
+              "    });",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search?limit=1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "description": "## Test 8: Schema Validation\n\n**Purpose**  \nConfirms that the API response follows a strict structural blueprint by validating it against a JSON Schema—a formal specification that defines exactly what a valid response should look like.\n\n**How It Works**\n\n- Request: GET /images/search?limit=1\n    \n- Defines a JSON Schema that specifies:  \n    Response must be an array  \n    Each image must contain: id, url, width, height  \n    Field requirements: id and url are text, width and height are numbers ≥ 1, URLs start with https://\n    \n- Runs the schema validator to check the entire response at once\n    \n- If validation fails, logs detailed error messages to identify the exact problem\n    \n\n**What's Checked**\n\n- Status code: Server responds with 200 (success)\n    \n- Schema match: Response structure perfectly matches the defined blueprint\n    \n- Required fields: Each image object contains all mandatory fields (id, url, width, height)\n    \n- Error diagnostics: If validation fails, console shows which field broke the rules and why\n    \n\n**Why It Matters**\n\n- Contract testing: Treats the schema as a formal agreement between the API and client—if the API changes unexpectedly, this test catches it immediately.\n    \n- Faster debugging: Instead of manually checking each field, one test validates everything. When something breaks, one gets a specific error message (e.g., \"field width expected number but got string\") rather than vague failures.\n    \n- Reusable quality standard: The same schema can be used across multiple tests or endpoints, ensuring consistency. When updated, all related tests automatically use the new rules.\n    \n- Production confidence: Guarantees that every response has the exact structure one’s application expects, preventing runtime errors caused by missing or incorrectly formatted data.\n    \n\n**Notes**  \nYou may see a tv4 deprecation warning in the console—this is cosmetic and doesn't affect test functionality. The test performs two layers of validation: first against the full schema, then a direct check that required fields exist."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 9 - Pre-request Script Example",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Generate timestamp",
+              "const timestamp = new Date().toISOString();",
+              "pm.environment.set(\"test_timestamp\", timestamp);",
+              "",
+              "// Generate random limit between 1 and 10",
+              "const randomLimit = Math.floor(Math.random() * 10) + 1;",
+              "pm.environment.set(\"random_limit\", randomLimit);",
+              "",
+              "// Log what we generated",
+              "console.log(\"Test started at:\", timestamp);",
+              "console.log(\"Random limit generated:\", randomLimit);",
+              "",
+              "// Set a custom header (for demonstration)",
+              "pm.request.headers.add({",
+              "    key: 'X-Test-Run-ID',",
+              "    value: 'test-' + Date.now()",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Get response data + load random limit from environment",
+              "const jsonData = pm.response.json();",
+              "const randomLimit = parseInt(pm.environment.get(\"random_limit\"));",
+              "",
+              "// TEST 1: Status OK",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// TEST 2: FIXED - API always returns 10 (ignores limit)",
+              "pm.test(\"API returns exactly 10 images\", function () {",
+              "    pm.expect(jsonData.length).to.equal(10);",
+              "});",
+              "",
+              "// TEST 3: Custom header sent",
+              "pm.test(\"Custom header X-Test-Run-ID exists\", function () {",
+              "    pm.expect(pm.request.headers.get('X-Test-Run-ID')).to.exist;",
+              "});",
+              "",
+              "console.log(`Sent limit=${randomLimit}, API ignored it and sent 10 images`);",
+              "",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search?limit={{random_limit}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "{{random_limit}}"
+            }
+          ]
+        },
+        "description": "## Test 9 - Pre-request Script Example\n\n**Purpose**  \nDemonstrates full test automation by generating dynamic test data before the request is sent, ensuring each run is unique and realistic without manual setup.\n\n**How It Works**\n\n- Before request (pre-request script):  \n    Generates a random limit (1-10) and saves it to the environment as random_limit  \n    Creates an ISO timestamp and saves as test_timestamp  \n    Adds a custom header X-Test-Run-ID (e.g., test-1700000000000)  \n    Logs values to console\n    \n- Request: GET /images/search?limit={{random_limit}} (uses the dynamic limit)\n    \n- After response (test script):  \n    Verifies status 200  \n    Confirms API returns exactly 10 images (ignores the limit parameter)  \n    Checks custom header was sent  \n    Logs: \"Sent limit=X, API ignored it and sent 10 images\"\n    \n\n**What's Checked**\n\n- Status code: 200 (success)\n    \n- Response size: Exactly 10 images, regardless of random limit sent (documents’ observed API behavior)\n    \n- Custom header: X-Test-Run-ID is present on the request\n    \n- Dynamic data: Reads random_limit from environment to confirm setup worked\n    \n\n**Why It Matters**\n\n- End-to-end automation: Handles setup (random data, headers, timestamps), execution, and validation automatically—no manual changes needed between runs.\n    \n- Real-world simulation: Mimics production variability (e.g., random limits, tracking headers) to catch issues like parameter ignoring early.\n    \n- Debugging insights: Console logs show exactly what data was generated and sent vs. what the API returned, speeding up troubleshooting.\n    \n- Re-usable patterns: Pre-request scripts can be shared across tests, reducing duplication and enabling data chaining (e.g., one test's output feeds another's input).\n    \n\n**Notes**  \nThe API currently ignores limit without an API key, always returning 10 images—this test explicitly documents and verifies that behavior. Run it multiple times to see different random_limit values (1-10) in action."
+      },
+      "response": []
+    },
+    {
+      "name": "Test 10 - Comprehensive Test Suite",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Setup: Record test start time",
+              "pm.environment.set(\"suite_start_time\", Date.now());",
+              "",
+              "// Setup: Clear any previous test data",
+              "pm.environment.unset(\"test_errors\");",
+              "",
+              "console.log(\"COMPREHENSIVE TEST SUITE STARTED\");",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Get response data and measure test suite performance",
+              "const jsonData = pm.response.json();",
+              "const startTime = parseInt(pm.environment.get(\"suite_start_time\"));",
+              "const endTime = Date.now();",
+              "const totalTime = endTime - startTime;",
+              "",
+              "// SECTION 1: HTTP basics (does API respond correctly?)",
+              "pm.test(\"[HTTP] Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"[HTTP] Response time is acceptable (< 3000ms)\", function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+              "});",
+              "",
+              "pm.test(\"[HTTP] Content-Type is JSON\", function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "// SECTION 2: Response structure (is response properly formatted?)",
+              "pm.test(\"[Structure] Response is an array\", function () {",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test(\"[Structure] Response is not empty\", function () {",
+              "    pm.expect(jsonData.length).to.be.above(0);",
+              "});",
+              "",
+              "pm.test(\"[Structure] API respects reasonable limits (≤10)\", function () {",
+              "    pm.expect(jsonData.length).to.be.at.most(10);",
+              "});",
+              "",
+              "// SECTION 3: Data validation (check for required fields)",
+              "pm.test(\"[Data] All images have required fields\", function () {",
+              "    jsonData.forEach(function(image, index) {",
+              "        pm.expect(image, \"Image \" + index + \" has id\").to.have.property('id');",
+              "        pm.expect(image, \"Image \" + index + \" has url\").to.have.property('url');",
+              "        pm.expect(image, \"Image \" + index + \" has width\").to.have.property('width');",
+              "        pm.expect(image, \"Image \" + index + \" has height\").to.have.property('height');",
+              "    });",
+              "});",
+              "",
+              "pm.test(\"[Data] All IDs are unique\", function () {",
+              "    var ids = jsonData.map(image => image.id);",
+              "    var uniqueIds = [...new Set(ids)];",
+              "    pm.expect(ids.length).to.equal(uniqueIds.length);",
+              "});",
+              "",
+              "pm.test(\"[Data] All URLs are accessible HTTPS links\", function () {",
+              "    jsonData.forEach(function(image) {",
+              "        pm.expect(image.url).to.match(/^https:\\/\\//);",
+              "        pm.expect(image.url).to.include('.com');",
+              "    });",
+              "});",
+              "",
+              "// SECTION 4: Data type validation (are all values correct type?)",
+              "pm.test(\"[Types] All data types are correct\", function () {",
+              "    jsonData.forEach(function(image) {",
+              "        pm.expect(image.id).to.be.a('string');",
+              "        pm.expect(image.url).to.be.a('string');",
+              "        pm.expect(image.width).to.be.a('number');",
+              "        pm.expect(image.height).to.be.a('number');",
+              "    });",
+              "});",
+              "",
+              "pm.test(\"[Types] Dimensions are positive numbers\", function () {",
+              "    jsonData.forEach(function(image) {",
+              "        pm.expect(image.width).to.be.above(0);",
+              "        pm.expect(image.height).to.be.above(0);",
+              "    });",
+              "});",
+              "",
+              "// SECTION 5: CHECK (do images' dimensions are positive numbers and not 0x0 or negative)",
+              "pm.test(\"[Logic] Images have reasonable dimensions (not 0x0 or negative)\", function () {",
+              "    jsonData.forEach(function(image) {",
+              "        pm.expect(image.width * image.height).to.be.above(0);",
+              "    });",
+              "});",
+              "",
+              "// Print summary for debugging",
+              "console.log(\"COMPREHENSIVE TEST SUITE COMPLETED\");",
+              "console.log(\"Total execution time: \" + totalTime + \"ms\");",
+              "console.log(\"Images validated: \" + jsonData.length);",
+              "console.log(\"========================================\");",
+              "",
+              "// Store results for potential next tests",
+              "pm.environment.set(\"last_test_count\", jsonData.length);",
+              "pm.environment.set(\"last_test_time\", totalTime);",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/{{api_version}}/images/search?limit=5",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "{{api_version}}",
+            "images",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "5"
+            },
+            {
+              "key": "order",
+              "value": "RANDOM",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "## Test 10: Comprehensive Test Suite\n\n**Purpose**  \nServes as a complete health check (smoke/regression test) for the API endpoint, validating HTTP basics, response structure, and data quality in one organized run to confirm production readiness.\n\n**How It Works**\n\n- Pre-request: Records start time (suite_start_time) and logs \"COMPREHENSIVE TEST SUITE STARTED\"\n    \n- Request: GET /images/search?limit=5\n    \n- Post-response:  \n    Parses JSON response and calculates total suite time  \n    Runs \\~10 grouped tests across 3 sections (HTTP, structure, data)  \n    Checks each image individually where needed (e.g., required fields, URLs)\n    \n\n**What's Checked**\n\n- HTTP basics (3 checks): Status 200, response <3000ms, Content-Type includes application/json\n    \n- Response structure (3 checks): Array format, non-empty, length ≤10 (even with limit=5)\n    \n- Data quality (4+ checks): All images have id, url, width, height; IDs unique; every URL starts with https:// and includes .com\n    \n\n**Why It Matters**\n\n- Quick confidence: One click runs multiple validations—ideal for daily regression or CI/CD pipelines to catch regressions fast.\n    \n- Organized coverage: Grouped tests make failures easy to pinpoint (e.g., \"Image 2 missing height\" vs. vague errors).\n    \n- Performance insight: Tracks suite and response times, helping identify slowdowns before they impact users.\n    \n- Realistic limits: Validates practical behavior (≤10 images without API key), matching docs and preventing surprises in production."
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "default_limit",
+      "value": ""
+    },
+    {
+      "key": "max_limit",
+      "value": ""
+    },
+    {
+      "key": "test_breed_id",
+      "value": ""
+    }
+  ]
+}
